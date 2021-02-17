@@ -10,14 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extract-to-function.helloWorld"
+		"onCommand:extract-to-function.extract"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extract-to-function.helloWorld",
-				"title": "Hello World"
+				"command": "extract-to-function.extract",
+				"title": "Extract to function"
 			}
 		]
 	},
@@ -41,5 +41,8 @@
 		"mocha": "^8.2.1",
 		"typescript": "^4.1.3",
 		"vscode-test": "^1.5.0"
+	},
+	"dependencies": {
+		"debounce": "^1.2.0"
 	}
 }

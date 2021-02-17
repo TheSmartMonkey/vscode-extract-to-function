@@ -1,27 +1,46 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+'use strict';
+
 import * as vscode from 'vscode';
+const debounce = require('debounce');
+const config = vscode.workspace.getConfiguration('copyOnSelect');
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+// =============================================================================
+// EXTENSION INTERFACE
+// =============================================================================
 export function activate(context: vscode.ExtensionContext) {
+	let text = '';
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "extract-to-function" is now active!');
+	let disposable = vscode.commands.registerCommand('extract-to-function.extract', () => {
+		vscode.window.onDidChangeTextEditorSelection(debounce(async (event: vscode.TextEditorSelectionChangeEvent) => {
+			if (event) {
+				text = generateTextToCopy(event);
+			}
+		}, 300))
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extract-to-function.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Extract to function!');
+		vscode.window.showInformationMessage('Extract: ' + text);
 	});
 
 	context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
+
+// =============================================================================
+// FUNCIONS
+// =============================================================================
+function generateTextToCopy(event: vscode.TextEditorSelectionChangeEvent): string {
+    // generate text from selections
+    const eol = event.textEditor.document.eol == vscode.EndOfLine.LF ? '\n' : '\r\n';
+    let text = event.selections.map(selection => event.textEditor.document.getText(selection)).join(eol);
+
+    // do trimming if necessary
+    if (config.get('trimStart', false)) {
+        text = text.replace(/^\s+/, '');
+    }
+    if (config.get('trimEnd', true)) {
+        text = text.replace(/\s+$/, '');
+    }
+
+    return text;
+}
+
